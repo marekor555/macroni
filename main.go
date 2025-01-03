@@ -1,7 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
+	"os"
 	"time"
 
 	rg "github.com/go-vgo/robotgo"
@@ -52,15 +55,14 @@ type Combo struct {
 }
 
 type Macro struct {
-	Key    rune    // key to press (no win, ctrl, alt or F* allowed), lower letter
+	Key    string  // key to press (no win, ctrl, alt or F* allowed), lower letter
 	Combos []Combo // array of combos, use shortened modifiers(win, ctrl, alt) and lower letters
 }
 
 func main() {
-	// TODO: add reading from a file
 	var macros []Macro = []Macro{
 		{
-			Key: 'm',
+			Key: "m",
 			Combos: []Combo{
 				{Keypress: []string{"win", "f"}, Interval: 0, HoldTime: 200},
 				{Keypress: []string{"go.dev/dl"}, Interval: 1000, HoldTime: 2000},
@@ -68,12 +70,22 @@ func main() {
 			},
 		},
 	}
+
+	data, err := os.ReadFile("macro.json")
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	err = json.Unmarshal(data, &macros)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
 	eventHook := gh.Start() // listen for events
 
 	for e := range eventHook { // as eventHook is infinite stream, no external for loop needed
 		if e.Kind == gh.KeyDown { // check if event is keydown
 			for _, macro := range macros {
-				if macro.Key == e.Keychar {
+				if macro.Key == string(e.Keychar) {
 					for _, combo := range macro.Combos {
 						time.Sleep(time.Millisecond * time.Duration(combo.Interval))
 						makeShortcut(combo.HoldTime, combo.Keypress...)
