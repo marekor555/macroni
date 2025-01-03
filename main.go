@@ -9,53 +9,62 @@ import (
 )
 
 // executes a shortcut/combo
-func makeShortcut(chars ...string) {
+func makeShortcut(interval int, chars ...string) {
 	for _, ch := range chars {
 		switch ch {
 		case "win":
 			rg.KeyDown(rg.Cmd)
-			break
 		case "alt":
 			rg.KeyDown(rg.Alt)
-			break
 		case "ctrl":
 			rg.KeyDown(rg.Ctrl)
+		case "enter":
+			rg.KeyDown(rg.Enter)
 		default:
+			if len(ch) > 1 {
+				rg.TypeStr(ch)
+				return
+			}
 			rg.KeyDown(ch)
 		}
 	}
-	time.Sleep(time.Millisecond * 250)
+	time.Sleep(time.Millisecond * time.Duration(interval))
 	for _, ch := range chars {
 		switch ch {
 		case "win":
 			rg.KeyUp(rg.Cmd)
-			break
 		case "alt":
 			rg.KeyUp(rg.Alt)
-			break
 		case "ctrl":
 			rg.KeyUp(rg.Ctrl)
+		case "enter":
+			rg.KeyUp(rg.Enter)
 		default:
 			rg.KeyUp(ch)
 		}
 	}
 }
 
+type Combo struct {
+	Keypress []string
+	Interval int
+	HoldTime int
+}
+
 type Macro struct {
-	Key             rune       // key to press (no win, ctrl, alt or F* allowed), lower letter
-	ComboIntervalMs int        // interval in ms
-	Combos          [][]string // array of combos, use shortened modifiers(win, ctrl, alt) and lower letters
+	Key    rune    // key to press (no win, ctrl, alt or F* allowed), lower letter
+	Combos []Combo // array of combos, use shortened modifiers(win, ctrl, alt) and lower letters
 }
 
 func main() {
 	// TODO: add reading from a file
 	var macros []Macro = []Macro{
 		{
-			Key:             'o',
-			ComboIntervalMs: 1000,
-			Combos: [][]string{
-				{"win", "f"},
-				{"ctrl", "f"},
+			Key: 'm',
+			Combos: []Combo{
+				{Keypress: []string{"win", "f"}, Interval: 0, HoldTime: 200},
+				{Keypress: []string{"go.dev/dl"}, Interval: 1000, HoldTime: 2000},
+				{Keypress: []string{"enter"}, Interval: 10, HoldTime: 200},
 			},
 		},
 	}
@@ -66,8 +75,8 @@ func main() {
 			for _, macro := range macros {
 				if macro.Key == e.Keychar {
 					for _, combo := range macro.Combos {
-						makeShortcut(combo...)
-						time.Sleep(time.Millisecond * time.Duration(macro.ComboIntervalMs))
+						time.Sleep(time.Millisecond * time.Duration(combo.Interval))
+						makeShortcut(combo.HoldTime, combo.Keypress...)
 					}
 				}
 			}
