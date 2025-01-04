@@ -23,6 +23,8 @@ func makeShortcut(interval int, chars ...string) {
 			rg.KeyDown(rg.Ctrl)
 		case "enter":
 			rg.KeyDown(rg.Enter)
+		case "mleft":
+			rg.MouseDown("left")
 		default:
 			if len(ch) > 1 {
 				rg.TypeStr(ch)
@@ -42,10 +44,26 @@ func makeShortcut(interval int, chars ...string) {
 			rg.KeyUp(rg.Ctrl)
 		case "enter":
 			rg.KeyUp(rg.Enter)
+		case "mleft":
+			rg.MouseUp("left")
 		default:
 			rg.KeyUp(ch)
 		}
 	}
+}
+
+func exitCode() {
+	keys := []string{ // \(¯-¯)/
+		"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
+		"1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
+		"shift", "ctrl", "alt", "cmd", "tab", "enter", "space", "esc",
+		"up", "down", "left", "right",
+	}
+	for _, key := range keys {
+		rg.KeyUp(key)
+	}
+	rg.MouseUp("left")
+	os.Exit(0)
 }
 
 type Combo struct {
@@ -82,8 +100,21 @@ func main() {
 
 	eventHook := gh.Start() // listen for events
 
+	go func(eventHook chan gh.Event) {
+		for e := range eventHook {
+			if e.Kind == gh.KeyDown {
+				if e.Keychar == '+' {
+					exitCode()
+				}
+			}
+		}
+	}(eventHook)
+
 	for e := range eventHook { // as eventHook is infinite stream, no external for loop needed
 		if e.Kind == gh.KeyDown { // check if event is keydown
+			if e.Keychar == '+' {
+				exitCode()
+			}
 			for _, macro := range macros {
 				if macro.Key == string(e.Keychar) {
 					for _, combo := range macro.Combos {

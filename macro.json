@@ -1,37 +1,11 @@
 [
     {
-        "key": "m",
-        "combos": [
-            {
-                "keypress": [
-                    "win",
-                    "f"
-                ],
-                "interval": 0,
-                "holdTime": 200
-            },
-            {
-                "keypress": [
-                    "go.dev/dl"
-                ],
-                "interval": 1000,
-                "holdTime": 2000
-            },
-            {
-                "keypress": [
-                    "enter"
-                ],
-                "interval": 10,
-                "holdTime": 200
-            }
-        ]
-    },
-    {
         "key": "x",
         "combos": [
             {
                 "keypress": [
-                    "w"
+                    "w",
+                    "mleft"
                 ],
                 "interval": 0,
                 "holdTime":2000
