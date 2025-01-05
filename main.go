@@ -52,7 +52,10 @@ func makeShortcut(interval int, chars ...string) {
 	}
 }
 
-func exitCode() {
+func exitCode(e gh.Event) {
+	if e.Keychar != '=' {
+		return
+	}
 	keys := []string{ // \(¯-¯)/
 		"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
 		"1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
@@ -107,9 +110,8 @@ func main() {
 	go func(eventHook chan gh.Event) {
 		for e := range eventHook {
 			if e.Kind == gh.KeyDown {
-				if e.Keychar == '=' {
-					exitCode()
-				}
+
+				exitCode(e)
 				checkMacro(macros, e)
 			}
 		}
@@ -117,9 +119,7 @@ func main() {
 
 	for e := range eventHook { // as eventHook is infinite stream, no external for loop needed
 		if e.Kind == gh.KeyDown { // check if event is keydown
-			if e.Keychar == '=' {
-				exitCode()
-			}
+			exitCode(e)
 			checkMacro(macros, e)
 		}
 	}
