@@ -91,16 +91,7 @@ func checkMacro(macros []Macro, e gh.Event) {
 }
 
 func main() {
-	var macros []Macro = []Macro{
-		{
-			Key: "m",
-			Combos: []Combo{
-				{Keypress: []string{"win", "f"}, Interval: 0, HoldTime: 200},
-				{Keypress: []string{"go.dev/dl"}, Interval: 1000, HoldTime: 2000},
-				{Keypress: []string{"enter"}, Interval: 10, HoldTime: 200},
-			},
-		},
-	}
+	var macros []Macro = []Macro{}
 
 	data, err := os.ReadFile("macro.json")
 	if err != nil {
