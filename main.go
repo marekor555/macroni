@@ -77,6 +77,19 @@ type Macro struct {
 	Combos []Combo // array of combos, use shortened modifiers(win, ctrl, alt) and lower letters
 }
 
+func checkMacro(macros []Macro, e gh.Event) {
+	for _, macro := range macros {
+		if macro.Key == string(e.Keychar) {
+			for _, combo := range macro.Combos {
+				fmt.Printf("Macrokey1: %v; holdtime: %v", combo.Keypress[0], combo.HoldTime)
+				time.Sleep(time.Millisecond * time.Duration(combo.Interval))
+				makeShortcut(combo.HoldTime, combo.Keypress...)
+			}
+		}
+	}
+	fmt.Printf("Key down: rawcode=%d, keychar=%s\n", e.Rawcode, string(e.Keychar)) // keylogger :>
+}
+
 func main() {
 	var macros []Macro = []Macro{
 		{
@@ -103,27 +116,20 @@ func main() {
 	go func(eventHook chan gh.Event) {
 		for e := range eventHook {
 			if e.Kind == gh.KeyDown {
-				if e.Keychar == '+' {
+				if e.Keychar == '=' {
 					exitCode()
 				}
+				checkMacro(macros, e)
 			}
 		}
 	}(eventHook)
 
 	for e := range eventHook { // as eventHook is infinite stream, no external for loop needed
 		if e.Kind == gh.KeyDown { // check if event is keydown
-			if e.Keychar == '+' {
+			if e.Keychar == '=' {
 				exitCode()
 			}
-			for _, macro := range macros {
-				if macro.Key == string(e.Keychar) {
-					for _, combo := range macro.Combos {
-						time.Sleep(time.Millisecond * time.Duration(combo.Interval))
-						makeShortcut(combo.HoldTime, combo.Keypress...)
-					}
-				}
-			}
-			fmt.Printf("Key down: rawcode=%d, keychar=%s\n", e.Rawcode, string(e.Keychar)) // keylogger :>
+			checkMacro(macros, e)
 		}
 	}
 
