@@ -94,7 +94,7 @@ func checkMacro(macros []Macro, e gh.Event) {
 }
 
 func main() {
-	var macros []Macro = []Macro{}
+	var macros []Macro
 
 	data, err := os.ReadFile("macro.json")
 	if err != nil {
